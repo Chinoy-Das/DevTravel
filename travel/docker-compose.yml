@@ -1,0 +1,52 @@
+version: '4.30'
+
+services:
+  www:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8004:80"
+    volumes:
+      - ./www:/var/www/html
+    depends_on:
+      - db-1
+    networks:
+      - traveling_network
+
+  db-1:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: chinoy
+      MYSQL_DATABASE: travel
+      MYSQL_USER: chinoy
+      MYSQL_PASSWORD: chinoy
+    ports:
+      - "3310:3310"
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+    networks:
+      - traveling_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "82:80"
+    environment:
+      MYSQL_ROOT_PASSWORD: chinoy
+      MYSQL_USER: chinoy
+      MYSQL_PASSWORD: chinoy
+      PMA_HOST: db-1  # Add this line to specify the MySQL hostname
+    networks:
+      - traveling_network
+    depends_on:
+      - db-1
+
+networks:
+  traveling_network:
+
+volumes:
+  db_data:
